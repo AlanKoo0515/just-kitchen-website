@@ -1,14 +1,18 @@
+import Image from "next/image";
+
 export default function HeroSection() {
   return (
-    <section className="relative w-full h-[340px] md:h-[420px] flex items-center justify-center overflow-hidden bg-gray-100">
-      <img
-        src="/hero-bg.jpg"
+    <section className="relative w-full h-[540px] md:h-[620px] flex items-start justify-end overflow-hidden bg-gray-100 p-12">
+      <Image
+        src="/herobg.jpeg"
         alt="Bathroom Hero Background"
-        className="absolute inset-0 w-full h-full object-cover object-center z-0"
+        fill
+        className="object-cover object-center z-0"
         style={{ filter: "brightness(0.85)" }}
+        priority
       />
-      <div className="relative z-10 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-[#b23a2b] mb-4 drop-shadow-lg">
+      <div className="relative z-10 text-right">
+        <h1 className="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg bg-gradient-to-r from-[#b23a2b] to-[#fff0f3] bg-clip-text text-transparent">
           Live inspired.
           <br />
           Curate with Purpose.

@@ -16,13 +16,13 @@ export default function Navbar() {
             alt="Just Kitchen & Bath Logo"
             width={48}
             height={48}
-            className="rounded"
+            className="rounded shadow-lg"
           />
-          <span className="font-bold text-lg tracking-tight text-[#811200]">
+          <span className="font-bold text-lg tracking-tight text-[#811200] drop-shadow-xl">
             Just Kitchen & Bath
           </span>
         </div>
-        <ul className="hidden md:flex gap-8 text-sm font-medium text-gray-700">
+        <ul className="hidden md:flex gap-8 text-sm font-medium">
           {navLinks.map((link) => (
             <li key={link.name}>
               <a
