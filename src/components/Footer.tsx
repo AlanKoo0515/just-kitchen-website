@@ -1,10 +1,50 @@
 import Image from "next/image";
+import { FaMapPin, FaPhoneAlt, FaAt, FaRegClock } from "react-icons/fa";
 
 const socialLinks = [
-  { name: "Facebook", icon: "/social/facebook.svg", href: "#" },
-  { name: "Instagram", icon: "/social/instagram.svg", href: "#" },
-  { name: "WhatsApp", icon: "/social/whatsapp.svg", href: "#" },
-  { name: "Gmail", icon: "/social/gmail.svg", href: "#" },
+  {
+    name: "Facebook",
+    icon: (
+      <Image
+        src="/socialMedia/facebook.svg"
+        alt="Facebook"
+        width={24}
+        height={24}
+      />
+    ),
+    href: "#",
+  },
+  {
+    name: "Instagram",
+    icon: (
+      <Image
+        src="/socialMedia/instagram.svg"
+        alt="Instagram"
+        width={24}
+        height={24}
+      />
+    ),
+    href: "#",
+  },
+  {
+    name: "WhatsApp",
+    icon: (
+      <Image
+        src="/socialMedia/whatsapp.svg"
+        alt="WhatsApp"
+        width={24}
+        height={24}
+      />
+    ),
+    href: "#",
+  },
+  {
+    name: "Gmail",
+    icon: (
+      <Image src="/socialMedia/google.svg" alt="Gmail" width={24} height={24} />
+    ),
+    href: "#",
+  },
 ];
 
 const footerLinks = [
@@ -15,57 +55,77 @@ const footerLinks = [
   "DISCLAIMER",
 ];
 
+const iconClass = "mr-2";
+const iconSize = 20;
+
 export default function Footer() {
   return (
-    <footer className="bg-white border-t mt-16">
-      <div className="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-3 gap-8 items-start">
-        <div className="flex flex-col items-center md:items-start">
-          <Image
-            src="/logo.svg"
-            alt="Just Kitchen & Bath Logo"
-            width={80}
-            height={80}
-            className="mb-4"
-          />
+    <footer className="mt-16">
+      <div className="bg-gray-300 h-[1px]"></div>
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="grid md:grid-cols-2 gap-[160px] items-start mb-8">
+          <div className="flex flex-col pl-[150px] items-center md:items-start">
+            <Image
+              src="/logo.jpg"
+              alt="Just Kitchen & Bath Logo"
+              width={200}
+              height={200}
+              className="mb-4"
+            />
+          </div>
+          <div className="text-center md:text-left text-sm text-gray-700 pr-[150px]">
+            <div className="mb-4 flex items-center gap-2">
+              <FaMapPin className="text-2xl mr-3" />
+              <span>
+                3, Jalan Perniagaan Santuari, <br />
+                Pusat Perniagaan Santuari, <br />
+                14000 Bukit Mertajam, Pulau Pinang
+              </span>
+            </div>
+            <div className="mb-4 flex items-center gap-2">
+              <FaPhoneAlt className={iconClass} size={iconSize} />
+              <span>+60 12-441 4202</span>
+              <FaAt className={iconClass + " ml-4"} size={iconSize} />
+              <span>admin@justkitchenbath.com</span>
+            </div>
+            <div className="mb-6 flex items-center gap-2">
+              <FaRegClock className={iconClass} size={iconSize} />
+              <span>Open every day: 10am - 7pm</span>
+            </div>
+            <div className="flex gap-4 justify-center md:justify-start mt-4 items-center">
+              <span className="text-sm text-gray-500">Social Media</span>
+              {socialLinks.map((s) => (
+                <a
+                  key={s.name}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-2xl transition-transform hover:scale-125"
+                >
+                  {s.icon}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="text-center md:text-left text-sm text-gray-700">
-          <div className="mb-2">
-            <span className="font-semibold">
-              3, Jalan Perniagaan Santuari, Pusat Perniagaan Santuari, 14000
-              Bukit Mertajam, Pulau Pinang
-            </span>
-          </div>
-          <div className="mb-2">
-            +60 12-441 4202 &nbsp; | &nbsp; admin@justkitchenbath.com
-          </div>
-          <div className="mb-2">Open every day: 10am - 7pm</div>
-          <div className="flex gap-3 justify-center md:justify-start mt-2">
-            {socialLinks.map((s) => (
+
+        {/* Footer Links */}
+        <div className="flex flex-wrap justify-between items-center gap-6 pt-6 pl-[150px]">
+          <div className="flex flex-wrap gap-6">
+            {footerLinks.map((link) => (
               <a
-                key={s.name}
-                href={s.href}
-                target="_blank"
-                rel="noopener noreferrer"
+                key={link}
+                href="#"
+                className="text-xs text-gray-500 hover:text-[#a52a2a]"
               >
-                <img src={s.icon} alt={s.name} className="w-6 h-6" />
+                {link}
               </a>
             ))}
           </div>
+          <div className="text-xs text-gray-400 pr-[150px]">
+            Copyright © 2023 - Just Kitchen & Bath (202401031387)
+          </div>
         </div>
-        <div className="flex flex-col items-center md:items-end gap-2">
-          {footerLinks.map((link) => (
-            <a
-              key={link}
-              href="#"
-              className="text-xs text-gray-500 hover:text-[#a52a2a]"
-            >
-              {link}
-            </a>
-          ))}
-        </div>
-      </div>
-      <div className="text-center text-xs text-gray-400 py-4 border-t">
-        Copyright © 2023 - Just Kitchen & Bath (202401031387)
       </div>
     </footer>
   );
