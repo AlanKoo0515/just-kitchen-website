@@ -135,13 +135,6 @@ export default function Navbar() {
                   minHeight: 260,
                 }}
               >
-                <button
-                  className="absolute top-4 right-4 text-gray-400 hover:text-[#a52a2a] text-2xl font-bold focus:outline-none"
-                  onClick={() => setActive(null)}
-                  aria-label="Close catalogue dropdown"
-                >
-                  ×
-                </button>
                 <div className="text-xs text-gray-500 mb-2">
                   {catalogues[active as keyof typeof catalogues]?.title}
                 </div>
@@ -175,7 +168,7 @@ export default function Navbar() {
           }
         }
         .animate-fadeInDown {
-          animation: fadeInDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          animation: fadeInDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
       `}</style>
     </header>
