@@ -53,29 +53,37 @@ const catalogues = {
 
 export default function Navbar() {
   const [active, setActive] = useState<string | null>(null);
-  const [hovering, setHovering] = useState(false);
-  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLUListElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Close dropdown with delay if not hovering
-  useEffect(() => {
-    if (!active) return;
-    if (!hovering) {
-      hoverTimeout.current = setTimeout(() => {
-        setActive(null);
-      }, 100);
-    } else if (hoverTimeout.current) {
-      clearTimeout(hoverTimeout.current);
-      hoverTimeout.current = null;
+  // Handle mouse enter/leave for smooth fade animations
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
+    setIsVisible(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsVisible(false);
+      setTimeout(() => {
+        setActive(null);
+      }, 300); // Wait for fade out animation to complete
+    }, 100); // Small delay before starting fade out
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
     return () => {
-      if (hoverTimeout.current) {
-        clearTimeout(hoverTimeout.current);
-        hoverTimeout.current = null;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
     };
-  }, [hovering, active]);
+  }, []);
 
   return (
     <header className="sticky top-0 z-30 bg-white shadow-sm">
@@ -95,14 +103,17 @@ export default function Navbar() {
         <ul
           className="hidden md:flex gap-8 text-sm font-medium"
           ref={navRef}
-          onMouseEnter={() => setHovering(true)}
-          onMouseLeave={() => setHovering(false)}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           {navLinks.map((link) => (
             <li
               key={link.key}
               className="relative"
-              onMouseEnter={() => setActive(link.key)}
+              onMouseEnter={() => {
+                setActive(link.key);
+                handleMouseEnter();
+              }}
             >
               <button
                 onClick={() => setActive(link.key)}
@@ -116,20 +127,29 @@ export default function Navbar() {
           ))}
         </ul>
         {/* Dropdown overlay and catalogue */}
-        {active && (
+        {(active || isVisible) && (
           <>
             {/* Fullscreen blur overlay except navbar */}
-            <div className="fixed left-0 top-[64px] w-screen h-[calc(100vh-64px)] z-30 bg-white/70 backdrop-blur-md transition-all duration-300" />
+            <div
+              className={`fixed left-0 top-[64px] w-screen h-[calc(100vh-64px)] z-30 bg-white/70 backdrop-blur-md transition-opacity duration-300 ease-in-out ${
+                isVisible ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ pointerEvents: isVisible ? "auto" : "none" }}
+            />
             {/* Dropdown catalogue */}
             <div
               className="fixed left-0 top-[64px] w-screen h-[340px] z-40"
-              style={{ pointerEvents: "auto" }}
-              onMouseEnter={() => setHovering(true)}
-              onMouseLeave={() => setHovering(false)}
+              style={{ pointerEvents: isVisible ? "auto" : "none" }}
+              onMouseEnter={isVisible ? handleMouseEnter : undefined}
+              onMouseLeave={isVisible ? handleMouseLeave : undefined}
             >
               <div
                 ref={dropdownRef}
-                className="mx-auto px-[600px] py-8 shadow-lg rounded-b-xl bg-white/90 relative animate-fadeInDown"
+                className={`mx-auto px-[600px] py-8 shadow-lg rounded-b-xl bg-white/90 relative transition-all duration-300 ease-in-out ${
+                  isVisible
+                    ? "opacity-100 transform translate-y-0"
+                    : "opacity-0 transform -translate-y-4"
+                }`}
                 style={{
                   marginTop: 0,
                   minHeight: 260,
@@ -157,18 +177,18 @@ export default function Navbar() {
         )}
       </nav>
       <style jsx global>{`
-        @keyframes fadeInDown {
-          0% {
-            opacity: 0;
-            transform: translateY(-24px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        /* Apple-style smooth transitions */
+        .transition-opacity {
+          transition-property: opacity;
         }
-        .animate-fadeInDown {
-          animation: fadeInDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        .transition-transform {
+          transition-property: transform;
+        }
+        .duration-300 {
+          transition-duration: 300ms;
+        }
+        .ease-in-out {
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         }
       `}</style>
     </header>
