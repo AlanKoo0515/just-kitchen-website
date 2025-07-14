@@ -117,7 +117,7 @@ export default function Navbar() {
             >
               <button
                 onClick={() => setActive(link.key)}
-                className={`hover:text-[#a52a2a] transition-colors px-2 py-1 focus:outline-none bg-transparent border-none ${
+                className={`hover:text-[#a52a2a] transition-colors px-2 py-1 focus:outline-none bg-transparent border-none cursor-pointer ${
                   active === link.key ? "text-[#a52a2a]" : ""
                 }`}
               >
