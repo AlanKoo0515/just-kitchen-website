@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const navLinks = [
   { name: "Bathroom Accessories", key: "bathroom" },
@@ -57,6 +58,7 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLUListElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const router = useRouter();
 
   // Handle mouse enter/leave for smooth fade animations
   const handleMouseEnter = () => {
@@ -89,16 +91,27 @@ export default function Navbar() {
     <header className="sticky top-0 z-30 bg-white shadow-sm">
       <nav className="max-w-7xl mx-auto flex items-center justify-center px-4 py-3 relative">
         <div className="flex items-center gap-3 pr-10">
-          <Image
-            src="/logo.jpg"
-            alt="Just Kitchen & Bath Logo"
-            width={48}
-            height={48}
-            className="rounded shadow-lg"
-          />
-          <span className="font-bold text-lg tracking-tight text-[#811200] drop-shadow-xl">
-            Just Kitchen & Bath
-          </span>
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => router.push("/")}
+            role="button"
+            tabIndex={0}
+            onKeyPress={(e) => {
+              if (e.key === "Enter" || e.key === " ") router.push("/");
+            }}
+            aria-label="Go to home page"
+          >
+            <Image
+              src="/logo.jpg"
+              alt="Just Kitchen & Bath Logo"
+              width={48}
+              height={48}
+              className="rounded shadow-lg"
+            />
+            <span className="font-bold text-lg tracking-tight text-[#811200] drop-shadow-xl">
+              Just Kitchen & Bath
+            </span>
+          </div>
         </div>
         <ul
           className="hidden md:flex gap-8 text-sm font-medium"
@@ -164,7 +177,10 @@ export default function Navbar() {
                       <li
                         key={item}
                         className="font-medium text-[20px] mb-1 text-black cursor-pointer hover:text-[#a52a2a] transition-colors"
-                        onClick={() => setActive(null)}
+                        onClick={() => {
+                          // setActive(null);
+                          router.push("/products");
+                        }}
                       >
                         {item}
                       </li>
