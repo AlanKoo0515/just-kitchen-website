@@ -60,7 +60,7 @@ const iconSize = 20;
 
 export default function Footer() {
   return (
-    <footer className="mt-16">
+    <footer>
       <div className="bg-gray-300 h-[1px]"></div>
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="grid md:grid-cols-2 gap-[160px] items-start mb-8">

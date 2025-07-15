@@ -88,7 +88,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-white shadow-sm">
+    <header className="sticky top-0 z-30 bg-white/50 backdrop-blur-md shadow-sm">
       <nav className="max-w-7xl mx-auto flex items-center justify-center px-4 py-3 relative">
         <div className="flex items-center gap-3 pr-10">
           <div
@@ -149,7 +149,7 @@ export default function Navbar() {
               }`}
               style={{ pointerEvents: isVisible ? "auto" : "none" }}
             />
-            {/* Dropdown catalogue */}
+            {/* Dropdown catalogue with 50% opacity and blur */}
             <div
               className="fixed left-0 top-[64px] w-screen h-[340px] z-40"
               style={{ pointerEvents: isVisible ? "auto" : "none" }}
@@ -158,7 +158,7 @@ export default function Navbar() {
             >
               <div
                 ref={dropdownRef}
-                className={`mx-auto px-[600px] py-8 shadow-lg rounded-b-xl bg-white/90 relative transition-all duration-300 ease-in-out ${
+                className={`mx-auto px-[600px] py-8 shadow-lg rounded-b-xl bg-white/50 backdrop-blur-md relative transition-all duration-300 ease-in-out ${
                   isVisible
                     ? "opacity-100 transform translate-y-0"
                     : "opacity-0 transform -translate-y-4"

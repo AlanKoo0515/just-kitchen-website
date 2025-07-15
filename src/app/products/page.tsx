@@ -1,20 +1,82 @@
+"use client";
+
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BathroomHeroSection from "@/components/BathroomHeroSection";
+import ProductFilters from "@/components/ProductFilters";
+import ProductGrid from "@/components/ProductGrid";
+
+const mockProducts = [
+  {
+    image: "/featured/basincabinet.png",
+    name: "Wash Basin Tap",
+    price: "RM 980.00",
+    colors: ["#FFD700", "#F4C542", "#000000"],
+  },
+  {
+    image: "/featured/basincabinet.png",
+    name: "Wash Basin Tap",
+    price: "RM 980.00",
+    colors: ["#FFD700", "#F4C542", "#000000"],
+  },
+  {
+    image: "/featured/basincabinet.png",
+    name: "Wash Basin Tap",
+    price: "RM 980.00",
+    colors: ["#FFD700", "#F4C542", "#000000"],
+  },
+  {
+    image: "/featured/basincabinet.png",
+    name: "Wash Basin Tap",
+    price: "RM 980.00",
+    colors: ["#FFD700", "#F4C542", "#000000"],
+  },
+  {
+    image: "/featured/basincabinet.png",
+    name: "Wash Basin Tap",
+    price: "RM 980.00",
+    colors: ["#FFD700", "#F4C542", "#000000"],
+  },
+  {
+    image: "/featured/basincabinet.png",
+    name: "Wash Basin Tap",
+    price: "RM 980.00",
+    colors: ["#FFD700", "#F4C542", "#000000"],
+  },
+  {
+    image: "/featured/basincabinet.png",
+    name: "Wash Basin Tap",
+    price: "RM 980.00",
+    colors: ["#FFD700", "#F4C542", "#000000"],
+  },
+  {
+    image: "/featured/basincabinet.png",
+    name: "Wash Basin Tap",
+    price: "RM 980.00",
+    colors: ["#FFD700", "#F4C542", "#000000"],
+  },
+  {
+    image: "/featured/basincabinet.png",
+    name: "Wash Basin Tap",
+    price: "RM 980.00",
+    colors: ["#FFD700", "#F4C542", "#000000"],
+  },
+];
 
 export default function ProductListPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[#f7f7fa] pt-8 pb-16">
-        {/* TODO: Replace with actual product grid and filters */}
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-6">Product List Page</h1>
-          <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
-            Product grid and filters will go here.
+      <div className="bg-[#f7f7fa] min-h-screen">
+        <BathroomHeroSection />
+        <main className="pt-8 pb-16">
+          <div className="max-w-7xl mx-auto px-40 py-8">
+            <ProductFilters />
+            <ProductGrid products={mockProducts} />
           </div>
-        </div>
-      </main>
-      <Footer />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }
