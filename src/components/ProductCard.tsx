@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
   name: string;
@@ -13,10 +14,13 @@ export default function ProductCard({
   colors = ["#FFD700", "#BDB6A2", "#000000"],
   onClick,
 }: ProductCardProps) {
+  const router = useRouter();
+  const slug = name.toLowerCase().replace(/\s+/g, "-");
+
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={onClick || (() => router.push(`/products/${slug}`))}
       className="bg-[#ededed] rounded-2xl p-6 flex flex-col items-center w-full h-96 transition-shadow hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#bdb6a2] cursor-pointer"
       style={{ minWidth: 220 }}
     >
