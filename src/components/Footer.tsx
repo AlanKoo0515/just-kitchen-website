@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { FaMapPin, FaPhoneAlt, FaAt, FaRegClock } from "react-icons/fa";
+import { FaPhoneAlt, FaAt, FaClock } from "react-icons/fa";
+import { MdLocationPin } from "react-icons/md";
 
 const socialLinks = [
   {
@@ -74,8 +75,8 @@ export default function Footer() {
             />
           </div>
           <div className="text-center md:text-left text-sm text-gray-700 pr-[150px]">
-            <div className="mb-4 flex items-center gap-2">
-              <FaMapPin className="text-2xl mr-3" />
+            <div className="mb-4 flex gap-2">
+              <MdLocationPin className="text-2xl mr-3 mt-1 justify-start" />
               <span>
                 3, Jalan Perniagaan Santuari, <br />
                 Pusat Perniagaan Santuari, <br />
@@ -89,7 +90,7 @@ export default function Footer() {
               <span>admin@justkitchenbath.com</span>
             </div>
             <div className="mb-6 flex items-center gap-2">
-              <FaRegClock className={iconClass} size={iconSize} />
+              <FaClock className={iconClass} size={iconSize} />
               <span>Open every day: 10am - 7pm</span>
             </div>
             <div className="flex gap-4 justify-center md:justify-start mt-4 items-center">
