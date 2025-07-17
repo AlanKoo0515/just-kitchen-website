@@ -111,7 +111,7 @@ export default function Footer() {
         </div>
 
         {/* Footer Links */}
-        <div className="flex flex-wrap justify-between items-center gap-6 pt-6 pl-[150px]">
+        <div className="flex flex-wrap justify-between items-center gap-6 pl-[150px]">
           <div className="flex flex-wrap gap-6">
             {footerLinks.map((link) => (
               <a

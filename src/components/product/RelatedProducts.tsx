@@ -19,7 +19,7 @@ export default function RelatedProducts({
         {relatedProducts.map((prod, idx) => (
           <div
             key={idx}
-            className="bg-[#ededed] rounded-2xl p-6 flex flex-col items-center w-64 transition-transform duration-300 hover:scale-105"
+            className="bg-[#ededed] rounded-2xl p-6 flex flex-col items-center w-64 cursor-pointer transition-transform duration-300 hover:scale-105"
           >
             <Image
               src={prod.image}
