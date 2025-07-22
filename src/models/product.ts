@@ -1,4 +1,4 @@
-import { model, Schema, models } from "mongoose";
+import { model, Schema, models, InferSchemaType } from "mongoose";
 
 const productSchema = new Schema({
   name: {
@@ -49,6 +49,15 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
+
+// Export the inferred type
+export type ProductType = InferSchemaType<typeof productSchema> & {
+  _id: string;
+};
 
 export const Product = models.Product || model("Product", productSchema);

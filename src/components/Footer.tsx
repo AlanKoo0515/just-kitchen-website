@@ -69,8 +69,8 @@ export default function Footer() {
   return (
     <footer>
       <div className="bg-[#811200] mx-auto px-[150px] py-10">
-        <div className="grid md:grid-cols-2 gap-[700px] items-start mb-8">
-          <div className="flex flex-col items-center md:items-start">
+        <div className="grid md:grid-cols-2 gap-[550px] items-start mb-8">
+          <div className="flex flex-col pl-[150px] items-center md:items-start">
             <Image
               src="/logo.jpg"
               alt="Just Kitchen & Bath Logo"
@@ -116,7 +116,7 @@ export default function Footer() {
         </div>
 
         {/* Footer Links */}
-        <div className="flex flex-wrap justify-between items-center gap-6 ">
+        <div className="flex flex-wrap justify-between items-center gap-6 pl-[150px]">
           <div className="flex flex-wrap gap-6">
             {footerLinks.map((link) => (
               <a

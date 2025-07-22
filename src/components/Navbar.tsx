@@ -4,61 +4,64 @@ import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const navLinks = [
-  { name: "Bathroom Accessories", key: "bathroom" },
-  { name: "Kitchen Accessories", key: "kitchen" },
-  { name: "Smart Home", key: "smart" },
-];
+interface CatalogueTag {
+  category: string;
+  tags: string[];
+}
 
-const catalogues = {
-  bathroom: {
-    title: "Explore Bathroom Accessories",
-    items: [
-      "Explore All Bathroom Accessories",
-      "Basin Cabinet",
-      "Bathtub & Jacuzzi",
-      "Basin Tap",
-      "Floor Drainer",
-      "Grab Bar",
-      "Hand Bidet",
-      "Mirror",
-      "Shelf",
-      "Shower Set",
-      "Toilet Bowl",
-      "Tower Bar",
-    ],
-  },
-  kitchen: {
-    title: "Explore Kitchen Accessories",
-    items: [
-      "Explore All Kitchen Accessories",
-      "Hood",
-      "Hob",
-      "Oven",
-      "Kitchen Sink",
-      "Sink Tap",
-      "Pull-Out Basket",
-    ],
-  },
-  smart: {
-    title: "Explore Smart Home",
-    items: [
-      "Explore All Smart Home",
-      "Smart Lock",
-      "Smart Switch",
-      "Smart Sensor",
-      "Smart Camera",
-    ],
-  },
-};
+interface NavLink {
+  name: string;
+  key: string;
+}
 
 export default function Navbar() {
+  const [navLinks, setNavLinks] = useState<NavLink[]>([]);
+  const [catalogues, setCatalogues] = useState<
+    Record<string, { category: string; tags: string[] }>
+  >({});
   const [active, setActive] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLUListElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
+
+  // Fetch categories and tags
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const res = await fetch("/api/category", {
+          cache: "no-store", // Ensure fresh data
+        });
+        if (!res.ok) throw new Error("Failed to fetch categories");
+        const { data }: { data: CatalogueTag[] } = await res.json();
+
+        const navLinks: NavLink[] = data.map((cat) => ({
+          name: cat.category,
+          key: cat.category.toLowerCase().replace(/\s+/g, "-"), // e.g., "Bathroom Accessories" -> "bathroom-accessories"
+        }));
+
+        const catalogues: Record<string, { category: string; tags: string[] }> =
+          data.reduce(
+            (acc, cat) => ({
+              ...acc,
+              [cat.category.toLowerCase().replace(/\s+/g, "-")]: {
+                category: `Explore ${cat.category}`,
+                tags: cat.tags,
+              },
+            }),
+            {}
+          );
+
+        setNavLinks(navLinks);
+        setCatalogues(catalogues);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        // Optionally set fallback data or show an error state
+      }
+    }
+    fetchCategories();
+  }, []);
 
   // Handle mouse enter/leave for smooth fade animations
   const handleMouseEnter = () => {
@@ -74,8 +77,8 @@ export default function Navbar() {
       setIsVisible(false);
       setTimeout(() => {
         setActive(null);
-      }, 300); // Wait for fade out animation to complete
-    }, 100); // Small delay before starting fade out
+      }, 300); // Wait for fade-out animation to complete
+    }, 100); // Small delay before starting fade-out
   };
 
   // Cleanup timeout on unmount
@@ -139,17 +142,14 @@ export default function Navbar() {
             </li>
           ))}
         </ul>
-        {/* Dropdown overlay and catalogue */}
-        {(active || isVisible) && (
+        {(active || isVisible) && catalogues[active as string] && (
           <>
-            {/* Fullscreen blur overlay except navbar */}
             <div
               className={`fixed left-0 top-[64px] w-screen h-[calc(100vh-64px)] z-30 bg-white/70 backdrop-blur-md transition-opacity duration-300 ease-in-out ${
                 isVisible ? "opacity-100" : "opacity-0"
               }`}
               style={{ pointerEvents: isVisible ? "auto" : "none" }}
             />
-            {/* Dropdown catalogue with 50% opacity and blur */}
             <div
               className="fixed left-0 top-[64px] w-screen h-[340px] z-40"
               style={{ pointerEvents: isVisible ? "auto" : "none" }}
@@ -169,23 +169,29 @@ export default function Navbar() {
                 }}
               >
                 <div className="text-xs text-gray-500 mb-2">
-                  {catalogues[active as keyof typeof catalogues]?.title}
+                  {catalogues[active as string]?.category}
                 </div>
                 <ul>
-                  {catalogues[active as keyof typeof catalogues]?.items.map(
-                    (item) => (
-                      <li
-                        key={item}
-                        className="font-medium text-[20px] mb-1 text-black cursor-pointer hover:text-[#a52a2a] transition-colors"
-                        onClick={() => {
-                          // setActive(null);
-                          router.push("/products");
-                        }}
-                      >
-                        {item}
-                      </li>
-                    )
-                  )}
+                  {catalogues[active as string]?.tags.map((item) => (
+                    <li
+                      key={item}
+                      className="font-medium text-[20px] mb-1 text-black cursor-pointer hover:text-[#a52a2a] transition-colors"
+                      onClick={() => {
+                        const category = catalogues[
+                          active as string
+                        ].category.replace("Explore ", "");
+                        const query =
+                          item === `Explore All ${category}`
+                            ? `category=${encodeURIComponent(category)}`
+                            : `category=${encodeURIComponent(
+                                category
+                              )}&tag=${encodeURIComponent(item)}`;
+                        router.push(`/products?${query}`);
+                      }}
+                    >
+                      {item}
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -193,7 +199,6 @@ export default function Navbar() {
         )}
       </nav>
       <style jsx global>{`
-        /* Apple-style smooth transitions */
         .transition-opacity {
           transition-property: opacity;
         }
