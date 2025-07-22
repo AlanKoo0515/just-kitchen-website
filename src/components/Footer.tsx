@@ -42,7 +42,13 @@ const socialLinks = [
   {
     name: "Gmail",
     icon: (
-      <Image src="/socialMedia/google.svg" alt="Gmail" width={24} height={24} />
+      <Image
+        src="/socialMedia/google.svg"
+        alt="Gmail"
+        width={24}
+        height={24}
+        className="text-white"
+      />
     ),
     href: "#",
   },
@@ -62,10 +68,9 @@ const iconSize = 20;
 export default function Footer() {
   return (
     <footer>
-      <div className="bg-gray-300 h-[1px]"></div>
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        <div className="grid md:grid-cols-2 gap-[160px] items-start mb-8">
-          <div className="flex flex-col pl-[150px] items-center md:items-start">
+      <div className="bg-[#811200] mx-auto px-[150px] py-10">
+        <div className="grid md:grid-cols-2 gap-[700px] items-start mb-8">
+          <div className="flex flex-col items-center md:items-start">
             <Image
               src="/logo.jpg"
               alt="Just Kitchen & Bath Logo"
@@ -74,27 +79,27 @@ export default function Footer() {
               className="mb-4"
             />
           </div>
-          <div className="text-center md:text-left text-sm text-gray-700 pr-[150px]">
+          <div className="text-center md:text-left text-sm text-gray-700">
             <div className="mb-4 flex gap-2">
-              <MdLocationPin className="text-2xl mr-3 mt-1 justify-start" />
-              <span>
+              <MdLocationPin className="text-2xl mr-3 mt-1 justify-start text-white" />
+              <span className="text-white">
                 3, Jalan Perniagaan Santuari, <br />
                 Pusat Perniagaan Santuari, <br />
                 14000 Bukit Mertajam, Pulau Pinang
               </span>
             </div>
-            <div className="mb-4 flex items-center gap-2">
+            <div className="mb-4 flex items-center gap-2 text-white">
               <FaPhoneAlt className={iconClass} size={iconSize} />
               <span>+60 12-441 4202</span>
               <FaAt className={iconClass + " ml-4"} size={iconSize} />
               <span>admin@justkitchenbath.com</span>
             </div>
-            <div className="mb-6 flex items-center gap-2">
+            <div className="mb-6 flex items-center gap-2 text-white">
               <FaClock className={iconClass} size={iconSize} />
               <span>Open every day: 10am - 7pm</span>
             </div>
             <div className="flex gap-4 justify-center md:justify-start mt-4 items-center">
-              <span className="text-sm text-gray-500">Social Media</span>
+              <span className="text-sm text-white">Social Media</span>
               {socialLinks.map((s) => (
                 <a
                   key={s.name}
@@ -111,19 +116,19 @@ export default function Footer() {
         </div>
 
         {/* Footer Links */}
-        <div className="flex flex-wrap justify-between items-center gap-6 pl-[150px]">
+        <div className="flex flex-wrap justify-between items-center gap-6 ">
           <div className="flex flex-wrap gap-6">
             {footerLinks.map((link) => (
               <a
                 key={link}
                 href="#"
-                className="text-xs text-gray-500 hover:text-[#a52a2a]"
+                className="text-xs text-white hover:cursor-pointer"
               >
                 {link}
               </a>
             ))}
           </div>
-          <div className="text-xs text-gray-400 pr-[150px]">
+          <div className="text-xs text-white pr-[150px]">
             Copyright © 2023 - Just Kitchen & Bath (202401031387)
           </div>
         </div>
