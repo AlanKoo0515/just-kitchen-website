@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Product, ProductType } from "@/models/product"; // Import ProductType
+import { Product, ProductType } from "@/models/product";
 import connectDb from "@/lib/mongodb";
 
 interface ProductGridProduct {
@@ -7,6 +7,7 @@ interface ProductGridProduct {
   name: string;
   price: string;
   colors: string[];
+  slug: string;
 }
 
 interface QueryCondition {
@@ -45,12 +46,23 @@ export async function GET(request: NextRequest) {
       .sort(sort)
       .lean()) as unknown as ProductType[];
 
-    const formattedProducts: ProductGridProduct[] = products.map((product) => ({
-      image: product.colorOptions[0]?.images[0] || "/placeholder.png",
-      name: product.name,
-      price: `RM ${product.price.toFixed(2)}`,
-      colors: product.colorOptions.map((option) => option.hex),
-    }));
+    const formattedProducts: ProductGridProduct[] = products.map((product) => {
+      const rawImage = product.colorOptions[0]?.images[0] || "/placeholder.png";
+      const image = rawImage.startsWith("/") ? rawImage : `/${rawImage}`;
+      // Debug log for invalid images
+      if (!product.colorOptions[0]?.images[0]) {
+        console.warn(
+          `No valid image for product "${product.name}" (slug: ${product.slug})`
+        );
+      }
+      return {
+        image,
+        name: product.name,
+        price: `RM ${product.price.toFixed(2)}`,
+        colors: product.colorOptions.map((option) => option.hex),
+        slug: product.slug,
+      };
+    });
 
     return NextResponse.json({ status: 200, data: formattedProducts });
   } catch (error) {
@@ -62,7 +74,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST handler remains unchanged
 export async function POST(request: NextRequest) {
   await connectDb();
   try {

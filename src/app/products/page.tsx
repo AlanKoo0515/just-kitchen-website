@@ -1,3 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import useSWR from "swr";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BathroomHeroSection from "@/components/BathroomHeroSection";
@@ -9,15 +14,29 @@ interface ProductGridProduct {
   name: string;
   price: string;
   colors: string[];
+  slug: string;
 }
 
-async function fetchProducts(
-  category?: string,
-  tag?: string,
-  sortBy: string = "createdAt",
-  order: string = "desc",
-  search?: string
-): Promise<ProductGridProduct[]> {
+const fetcher = async (url: string): Promise<ProductGridProduct[]> => {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error("Failed to fetch products");
+  }
+  const { data } = await res.json();
+  return data;
+};
+
+export default function ProductListPage() {
+  const searchParams = useSearchParams();
+  const category = searchParams.get("category") || undefined;
+  const tag = searchParams.get("tag") || undefined;
+  const [sortBy, setSortBy] = useState(
+    searchParams.get("sortBy") || "createdAt"
+  );
+  const [order, setOrder] = useState(searchParams.get("order") || "desc");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+
+  // Build query string for SWR
   const params = new URLSearchParams();
   if (category) params.set("category", category);
   if (tag && !tag.startsWith("Explore All")) params.set("tag", tag);
@@ -25,40 +44,27 @@ async function fetchProducts(
   params.set("order", order);
   if (search) params.set("search", search);
 
-  const res = await fetch(
+  const {
+    data: products = [],
+    error,
+    isLoading,
+  } = useSWR<ProductGridProduct[]>(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/product?${params.toString()}`,
-    {
-      cache: "no-store", // Ensure fresh data
-    }
+    fetcher,
+    { revalidateOnFocus: false, dedupingInterval: 1000 }
   );
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch products");
-  }
+  // Update URL without navigation
+  useEffect(() => {
+    const newParams = new URLSearchParams();
+    if (category) newParams.set("category", category);
+    if (tag && !tag.startsWith("Explore All")) newParams.set("tag", tag);
+    newParams.set("sortBy", sortBy);
+    newParams.set("order", order);
+    if (search) newParams.set("search", search);
 
-  const { data } = await res.json();
-  return data as ProductGridProduct[];
-}
-
-export default async function ProductListPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    category?: string;
-    tag?: string;
-    sortBy?: string;
-    order?: string;
-    search?: string;
-  }>;
-}) {
-  const {
-    category,
-    tag,
-    sortBy = "createdAt",
-    order = "desc",
-    search,
-  } = await searchParams; // Await searchParams
-  const products = await fetchProducts(category, tag, sortBy, order, search);
+    window.history.replaceState(null, "", `/products?${newParams.toString()}`);
+  }, [sortBy, order, search, category, tag]);
 
   return (
     <>
@@ -69,8 +75,19 @@ export default async function ProductListPage({
           <div className="max-w-7xl mx-auto px-40 py-8">
             <ProductFilters
               tag={tag && !tag.startsWith("Explore All") ? tag : undefined}
+              onSortChange={(newSortBy, newOrder) => {
+                setSortBy(newSortBy);
+                setOrder(newOrder);
+              }}
+              onSearch={setSearch}
             />
-            {products.length === 0 ? (
+            {isLoading ? (
+              <p className="text-center text-gray-500">Loading products...</p>
+            ) : error ? (
+              <p className="text-center text-red-500">
+                Error loading products. Please try again later.
+              </p>
+            ) : products.length === 0 ? (
               <p className="text-center text-gray-500">No products found.</p>
             ) : (
               <ProductGrid products={products} />

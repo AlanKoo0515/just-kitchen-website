@@ -4,20 +4,36 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
+  image: string;
   name: string;
   price: string;
-  colors?: string[];
+  colors: string[];
+  slug: string;
   onClick?: () => void;
 }
 
 export default function ProductCard({
+  image,
   name,
   price,
-  colors = ["#FFD700", "#BDB6A2", "#000000"],
+  colors,
+  slug,
   onClick,
 }: ProductCardProps) {
   const router = useRouter();
-  const slug = name.toLowerCase().replace(/\s+/g, "-");
+
+  // Ensure image is a valid string and prepend '/' if missing
+  const validImage =
+    image && typeof image === "string"
+      ? image.startsWith("/")
+        ? image
+        : `/${image}`
+      : "/placeholder.png"; // Use lowercase .png for consistency
+
+  // Debug log to check image value
+  if (!image || typeof image !== "string") {
+    console.warn(`Invalid image for product "${name}":`, image);
+  }
 
   return (
     <button
@@ -28,7 +44,7 @@ export default function ProductCard({
     >
       <div className="w-44 h-64 flex items-center justify-center mb-4">
         <Image
-          src="/product/basintap.png"
+          src={validImage}
           alt={name}
           width={350}
           height={350}

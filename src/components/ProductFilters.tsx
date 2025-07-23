@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 const tabs = [
   { label: "Newest", sortBy: "createdAt", order: "desc" },
@@ -12,42 +11,26 @@ const tabs = [
 
 interface ProductFiltersProps {
   tag?: string;
+  onSortChange?: (sortBy: string, order: string) => void;
+  onSearch?: (q: string) => void;
 }
 
-export default function ProductFilters({ tag }: ProductFiltersProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export default function ProductFilters({
+  tag,
+  onSortChange,
+  onSearch,
+}: ProductFiltersProps) {
   const [activeTab, setActiveTab] = useState(0);
-  const [search, setSearch] = useState(searchParams.get("search") || "");
-
-  // Sync activeTab with URL sort parameters
-  useEffect(() => {
-    const sortBy = searchParams.get("sortBy") || "createdAt";
-    const order = searchParams.get("order") || "desc";
-    const tabIndex = tabs.findIndex(
-      (tab) => tab.sortBy === sortBy && tab.order === order
-    );
-    setActiveTab(tabIndex !== -1 ? tabIndex : 0);
-    setSearch(searchParams.get("search") || "");
-  }, [searchParams]);
+  const [search, setSearch] = useState("");
 
   const handleTabClick = (idx: number) => {
     setActiveTab(idx);
-    const newParams = new URLSearchParams(searchParams);
-    newParams.set("sortBy", tabs[idx].sortBy);
-    newParams.set("order", tabs[idx].order);
-    router.push(`/products?${newParams.toString()}`);
+    onSortChange?.(tabs[idx].sortBy, tabs[idx].order);
   };
 
   const handleSearch = (q: string) => {
     setSearch(q);
-    const newParams = new URLSearchParams(searchParams);
-    if (q) {
-      newParams.set("search", q);
-    } else {
-      newParams.delete("search");
-    }
-    router.push(`/products?${newParams.toString()}`);
+    onSearch?.(q);
   };
 
   return (
