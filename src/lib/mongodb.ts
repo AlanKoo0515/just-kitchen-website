@@ -1,21 +1,27 @@
+// src/lib/mongodb.ts
 import mongoose from "mongoose";
 
-const mongodbUri = process.env.MONGODB_URI as string;
-const mongodbName = process.env.MONGODB_NAME as string;
+const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!mongodbUri) {
-  throw new Error("MONGODB_URI is not set");
+if (!MONGODB_URI) {
+  throw new Error("Please define MONGODB_URI in your .env file");
 }
 
-if (!mongodbName) {
-  throw new Error("MONGODB_NAME is not set");
-}
+let cachedConnection: typeof mongoose | null = null;
 
 export default async function connectDb() {
+  if (cachedConnection) {
+    return cachedConnection;
+  }
+
   try {
-    mongoose.connect(mongodbUri, { dbName: mongodbName });
-    console.log("Connected to MongoDB");
+    const connection = await mongoose.connect(MONGODB_URI as string, {
+      bufferCommands: false,
+    });
+    cachedConnection = connection;
+    return connection;
   } catch (error) {
-    console.log(error);
+    console.error("MongoDB connection error:", error);
+    throw error;
   }
 }

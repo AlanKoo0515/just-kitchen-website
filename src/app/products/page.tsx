@@ -36,7 +36,6 @@ export default function ProductListPage() {
   const [order, setOrder] = useState(searchParams.get("order") || "desc");
   const [search, setSearch] = useState(searchParams.get("search") || "");
 
-  // Build query string for SWR
   const params = new URLSearchParams();
   if (category) params.set("category", category);
   if (tag && !tag.startsWith("Explore All")) params.set("tag", tag);
@@ -54,7 +53,6 @@ export default function ProductListPage() {
     { revalidateOnFocus: false, dedupingInterval: 1000 }
   );
 
-  // Update URL without navigation
   useEffect(() => {
     const newParams = new URLSearchParams();
     if (category) newParams.set("category", category);

@@ -1,18 +1,27 @@
+"use client";
+
 import Image from "next/image";
 
 interface ProductImageGalleryProps {
-  images: string[];
+  imageSets: string[][];
   selectedImageIdx: number;
   isTransitioning: boolean;
   onThumbnailClick: (idx: number) => void;
+  selectedColorIdx: number;
+  setSelectedColorIdx: (idx: number) => void;
+  setSelectedImageIdx: (idx: number) => void;
 }
 
 export default function ProductImageGallery({
-  images,
+  imageSets,
   selectedImageIdx,
   isTransitioning,
   onThumbnailClick,
+  selectedColorIdx,
 }: ProductImageGalleryProps) {
+  const images = imageSets[selectedColorIdx] ||
+    imageSets[0] || ["/placeholder.png"];
+
   return (
     <div className="flex flex-col">
       <div className="bg-[#ededed] rounded-2xl flex items-center justify-center p-6 overflow-hidden relative">

@@ -55,7 +55,6 @@ const productSchema = new Schema({
   },
 });
 
-// Export the inferred type
 export type ProductType = InferSchemaType<typeof productSchema> & {
   _id: string;
 };

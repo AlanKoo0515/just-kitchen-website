@@ -49,7 +49,6 @@ export async function GET(request: NextRequest) {
     const formattedProducts: ProductGridProduct[] = products.map((product) => {
       const rawImage = product.colorOptions[0]?.images[0] || "/placeholder.png";
       const image = rawImage.startsWith("/") ? rawImage : `/${rawImage}`;
-      // Debug log for invalid images
       if (!product.colorOptions[0]?.images[0]) {
         console.warn(
           `No valid image for product "${product.name}" (slug: ${product.slug})`
@@ -60,7 +59,7 @@ export async function GET(request: NextRequest) {
         name: product.name,
         price: `RM ${product.price.toFixed(2)}`,
         colors: product.colorOptions.map((option) => option.hex),
-        slug: product.slug,
+        slug: product.slug, // Uses updated slug (e.g., brass-basin-tap-hv-957-c)
       };
     });
 
@@ -104,9 +103,13 @@ export async function POST(request: NextRequest) {
         status: 400,
       });
     }
+    // Ensure unique slug by appending colorOptions[0].code
+    const uniqueSlug = colorOptions[0]?.code
+      ? `${slug}-${colorOptions[0].code.toLowerCase().replace(/\s+/g, "-")}`
+      : slug;
     const addProduct = new Product({
       name,
-      slug,
+      slug: uniqueSlug,
       description,
       price,
       colorOptions,

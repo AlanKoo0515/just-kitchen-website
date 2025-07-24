@@ -1,61 +1,53 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState, useEffect } from "react";
+import Link from "next/link";
+import { useState, useRef, useEffect } from "react";
+import useSWR from "swr";
 
-const categories = [
-  {
-    title: "Bathroom Accessories",
-    items: [
-      { name: "Basin Cabinet", icon: "/logo.jpg" },
-      { name: "Toilet Bowl", icon: "/logo.jpg" },
-      { name: "Shower Set", icon: "/logo.jpg" },
-      { name: "Bathtub & Jacuzzi", icon: "/logo.jpg" },
-      { name: "Mirror", icon: "/logo.jpg" },
-      { name: "Shelf", icon: "/logo.jpg" },
-      { name: "Basin Tap", icon: "/logo.jpg" },
-      { name: "Grab Bar", icon: "/logo.jpg" },
-      { name: "Grab Bar", icon: "/logo.jpg" },
-      { name: "Grab Bar", icon: "/logo.jpg" },
-      { name: "Grab Bar", icon: "/logo.jpg" },
-      { name: "Grab Bar", icon: "/logo.jpg" },
-      { name: "Grab Bar", icon: "/logo.jpg" },
-    ],
-  },
-  {
-    title: "Kitchen Accessories",
-    items: [
-      { name: "Hood", icon: "/logo.jpg" },
-      { name: "Hob", icon: "/logo.jpg" },
-      { name: "Oven", icon: "/logo.jpg" },
-      { name: "Kitchen Sink", icon: "/logo.jpg" },
-      { name: "Sink Tap", icon: "/logo.jpg" },
-      { name: "Pull-Out Basket", icon: "/logo.jpg" },
-    ],
-  },
-  {
-    title: "Smart Home",
-    items: [{ name: "Smart Lock", icon: "/logo.jpg" }],
-  },
-];
+interface Category {
+  category: string;
+  tags: { name: string; icon: string }[];
+}
+
+const fetcher = (url: string) =>
+  fetch(url, { cache: "no-store" }).then((res) =>
+    res.json().then((d) => d.data)
+  );
 
 export default function CategoryGrid() {
+  const { data: categories = [], error } = useSWR<Category[]>(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/category`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      refreshInterval: 0,
+      dedupingInterval: 60000, // Prevent rapid re-fetches
+    }
+  );
   const scrollRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [scrollStates, setScrollStates] = useState<
     { canScrollLeft: boolean; canScrollRight: boolean }[]
-  >([]);
+  >(categories.map(() => ({ canScrollLeft: false, canScrollRight: false })));
 
   const checkScrollPosition = (index: number) => {
     const container = scrollRefs.current[index];
     if (container) {
       const { scrollLeft, scrollWidth, clientWidth } = container;
       const canScrollLeft = scrollLeft > 0;
-      const canScrollRight = scrollLeft < scrollWidth - clientWidth - 1; // -1 for rounding errors
+      const canScrollRight = scrollLeft < scrollWidth - clientWidth - 1;
 
       setScrollStates((prev) => {
-        const newStates = [...prev];
-        newStates[index] = { canScrollLeft, canScrollRight };
-        return newStates;
+        if (
+          prev[index]?.canScrollLeft !== canScrollLeft ||
+          prev[index]?.canScrollRight !== canScrollRight
+        ) {
+          const newStates = [...prev];
+          newStates[index] = { canScrollLeft, canScrollRight };
+          return newStates;
+        }
+        return prev; // Avoid unnecessary state updates
       });
     }
   };
@@ -72,25 +64,18 @@ export default function CategoryGrid() {
   };
 
   useEffect(() => {
-    // Initialize scroll states
-    const initialStates = categories.map((_, index) => {
-      const container = scrollRefs.current[index];
-      if (container) {
-        const { scrollLeft, scrollWidth, clientWidth } = container;
-        return {
-          canScrollLeft: scrollLeft > 0,
-          canScrollRight: scrollLeft < scrollWidth - clientWidth - 1,
-        };
-      }
-      return { canScrollLeft: false, canScrollRight: false };
-    });
-    setScrollStates(initialStates);
+    // Initialize scroll states only when categories change
+    setScrollStates(
+      categories.map(() => ({ canScrollLeft: false, canScrollRight: false }))
+    );
 
-    // Add scroll event listeners
+    // Set up scroll listeners
     const scrollListeners = scrollRefs.current.map((container, index) => {
       if (container) {
         const handleScroll = () => checkScrollPosition(index);
         container.addEventListener("scroll", handleScroll);
+        // Trigger initial scroll check after render
+        setTimeout(() => checkScrollPosition(index), 0);
         return () => container.removeEventListener("scroll", handleScroll);
       }
       return () => {};
@@ -99,7 +84,11 @@ export default function CategoryGrid() {
     return () => {
       scrollListeners.forEach((cleanup) => cleanup());
     };
-  }, []);
+  }, [categories]);
+
+  if (error) {
+    return <div>Error loading categories. Please try again later.</div>;
+  }
 
   return (
     <section className="max-w-7xl mx-auto py-12 px-4">
@@ -115,12 +104,11 @@ export default function CategoryGrid() {
           const canScrollRight = scrollStates[index]?.canScrollRight ?? false;
 
           return (
-            <div key={cat.title} className="relative">
+            <div key={cat.category} className="relative">
               <h3 className="font-semibold text-lg mb-4 text-gray-700">
-                {cat.title}
+                {cat.category}
               </h3>
               <div className="relative group flex items-center min-h-[140px]">
-                {/* Left Arrow */}
                 {canScrollLeft && (
                   <button
                     onClick={() => scroll("left", index)}
@@ -141,8 +129,6 @@ export default function CategoryGrid() {
                     </svg>
                   </button>
                 )}
-
-                {/* Right Arrow */}
                 {canScrollRight && (
                   <button
                     onClick={() => scroll("right", index)}
@@ -163,16 +149,18 @@ export default function CategoryGrid() {
                     </svg>
                   </button>
                 )}
-
                 <div
                   ref={(el) => {
                     scrollRefs.current[index] = el;
                   }}
                   className="flex gap-9 overflow-x-auto pb-4 scrollbar-hide px-4 w-full"
                 >
-                  {cat.items.map((item, itemIndex) => (
-                    <div
-                      key={`${cat.title}-${item.name}-${itemIndex}`}
+                  {cat.tags.map((item, itemIndex) => (
+                    <Link
+                      key={`${cat.category}-${item.name}-${itemIndex}`}
+                      href={`/products?category=${encodeURIComponent(
+                        cat.category
+                      )}&tag=${encodeURIComponent(item.name)}`}
                       className="flex flex-col items-center text-center min-w-[120px]"
                     >
                       <Image
@@ -182,10 +170,8 @@ export default function CategoryGrid() {
                         height={120}
                         className="object-contain mb-2"
                       />
-                      <span className="text-md md:text-md text-gray-700">
-                        {item.name}
-                      </span>
-                    </div>
+                      <span className="text-md text-gray-700">{item.name}</span>
+                    </Link>
                   ))}
                 </div>
               </div>

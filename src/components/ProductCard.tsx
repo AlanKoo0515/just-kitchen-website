@@ -22,15 +22,13 @@ export default function ProductCard({
 }: ProductCardProps) {
   const router = useRouter();
 
-  // Ensure image is a valid string and prepend '/' if missing
   const validImage =
     image && typeof image === "string"
       ? image.startsWith("/")
         ? image
         : `/${image}`
-      : "/placeholder.png"; // Use lowercase .png for consistency
+      : "/placeholder.png";
 
-  // Debug log to check image value
   if (!image || typeof image !== "string") {
     console.warn(`Invalid image for product "${name}":`, image);
   }

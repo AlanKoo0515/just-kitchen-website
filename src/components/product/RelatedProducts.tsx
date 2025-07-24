@@ -1,10 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 
 interface RelatedProduct {
   name: string;
   price: string;
   colors: string[];
   image: string;
+  slug: string;
 }
 
 export default function RelatedProducts({
@@ -17,8 +19,9 @@ export default function RelatedProducts({
       <h2 className="text-3xl font-bold mb-8 text-center">You may also like</h2>
       <div className="flex gap-8 justify-center">
         {relatedProducts.map((prod, idx) => (
-          <div
+          <Link
             key={idx}
+            href={`/products/${prod.slug}`}
             className="bg-[#ededed] rounded-2xl p-6 flex flex-col items-center w-64 cursor-pointer transition-transform duration-300 hover:scale-105"
           >
             <Image
@@ -43,7 +46,7 @@ export default function RelatedProducts({
             <div className="text-sm text-gray-700 text-center">
               {prod.price}
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

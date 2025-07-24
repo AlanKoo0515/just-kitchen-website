@@ -3,10 +3,11 @@
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
 
 interface CatalogueTag {
   category: string;
-  tags: string[];
+  tags: { name: string; icon: string }[];
 }
 
 interface NavLink {
@@ -14,11 +15,12 @@ interface NavLink {
   key: string;
 }
 
+const fetcher = (url: string) =>
+  fetch(url, { cache: "no-store" }).then((res) =>
+    res.json().then((d) => d.data)
+  );
+
 export default function Navbar() {
-  const [navLinks, setNavLinks] = useState<NavLink[]>([]);
-  const [catalogues, setCatalogues] = useState<
-    Record<string, { category: string; tags: string[] }>
-  >({});
   const [active, setActive] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -26,44 +28,35 @@ export default function Navbar() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
 
-  // Fetch categories and tags
-  useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const res = await fetch("/api/category", {
-          cache: "no-store", // Ensure fresh data
-        });
-        if (!res.ok) throw new Error("Failed to fetch categories");
-        const { data }: { data: CatalogueTag[] } = await res.json();
-
-        const navLinks: NavLink[] = data.map((cat) => ({
-          name: cat.category,
-          key: cat.category.toLowerCase().replace(/\s+/g, "-"), // e.g., "Bathroom Accessories" -> "bathroom-accessories"
-        }));
-
-        const catalogues: Record<string, { category: string; tags: string[] }> =
-          data.reduce(
-            (acc, cat) => ({
-              ...acc,
-              [cat.category.toLowerCase().replace(/\s+/g, "-")]: {
-                category: `Explore ${cat.category}`,
-                tags: cat.tags,
-              },
-            }),
-            {}
-          );
-
-        setNavLinks(navLinks);
-        setCatalogues(catalogues);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        // Optionally set fallback data or show an error state
-      }
+  const { data: categories = [] } = useSWR<CatalogueTag[]>(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/category`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      refreshInterval: 0,
     }
-    fetchCategories();
-  }, []);
+  );
 
-  // Handle mouse enter/leave for smooth fade animations
+  const navLinks: NavLink[] = categories.map((cat) => ({
+    name: cat.category,
+    key: cat.category.toLowerCase().replace(/\s+/g, "-"),
+  }));
+
+  const catalogues: Record<
+    string,
+    { category: string; tags: { name: string; icon: string }[] }
+  > = categories.reduce(
+    (acc, cat) => ({
+      ...acc,
+      [cat.category.toLowerCase().replace(/\s+/g, "-")]: {
+        category: `Explore ${cat.category}`,
+        tags: cat.tags,
+      },
+    }),
+    {}
+  );
+
   const handleMouseEnter = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -77,11 +70,10 @@ export default function Navbar() {
       setIsVisible(false);
       setTimeout(() => {
         setActive(null);
-      }, 300); // Wait for fade-out animation to complete
-    }, 100); // Small delay before starting fade-out
+      }, 300);
+    }, 100);
   };
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -174,22 +166,22 @@ export default function Navbar() {
                 <ul>
                   {catalogues[active as string]?.tags.map((item) => (
                     <li
-                      key={item}
+                      key={item.name}
                       className="font-medium text-[20px] mb-1 text-black cursor-pointer hover:text-[#a52a2a] transition-colors"
                       onClick={() => {
                         const category = catalogues[
                           active as string
                         ].category.replace("Explore ", "");
                         const query =
-                          item === `Explore All ${category}`
+                          item.name === `Explore All ${category}`
                             ? `category=${encodeURIComponent(category)}`
                             : `category=${encodeURIComponent(
                                 category
-                              )}&tag=${encodeURIComponent(item)}`;
+                              )}&tag=${encodeURIComponent(item.name)}`;
                         router.push(`/products?${query}`);
                       }}
                     >
-                      {item}
+                      {item.name}
                     </li>
                   ))}
                 </ul>

@@ -1,66 +1,99 @@
 "use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
+import useSWR from "swr";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useState } from "react";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import ProductInfo from "@/components/product/ProductInfo";
 import RelatedProducts from "@/components/product/RelatedProducts";
 
-const mockProduct = {
-  name: "Wash Basin Tap - Matt Black",
-  price: "RM 980.00",
-  colors: ["#D81B60", "#BDB6A2", "#000000"],
-  code: "MDGR4FE/A",
-  images: [
-    "/product/basintap.png",
-    "/product/sideview.png",
-    "/product/topview.png",
-  ],
-  info: `Designed by Apple to complement iPhone 16 Plus, the Silicone Case with MagSafe is a delightful way to protect your iPhone. Made with a 55 percent recycled silicone material, the case has a silky, soft-touch finish on the exterior that feels great in your hand. And on the inside, there’s a soft microfiber lining for even more protection. This case works seamlessly with Camera Control. It features a sapphire crystal coupled to a conductive layer to communicate finger movements to the Camera Control. With built-in magnets that align perfectly with iPhone 16 Plus, this case offers a magical attach experience and faster wireless charging, every time.`,
-  material: "55% Recycled Silicone",
-  size: [
-    { label: "Height", value: "6.5 inches (165 mm)" },
-    { label: "Width", value: "3.2 inches (81 mm)" },
-    { label: "Depth", value: "0.5 inches (12 mm)" },
-  ],
+interface ProductType {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  colorOptions: { name: string; hex: string; images: string[]; code: string }[];
+  material: string;
+  size: { label: string; value: string }[];
+  category: string;
+  tags: string;
+}
+
+interface RelatedProduct {
+  name: string;
+  price: string;
+  colors: string[];
+  image: string;
+  slug: string;
+}
+
+const fetcher = async (
+  url: string
+): Promise<{
+  product: ProductType | null;
+  relatedProducts: RelatedProduct[];
+}> => {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error("Failed to fetch product");
+  }
+  const { data } = await res.json();
+  return data;
 };
 
-const relatedProducts = [
-  {
-    name: "Wash Basin Tap - Matt Black",
-    price: "RM 980.00",
-    colors: ["#FFD700", "#BDB6A2", "#000000"],
-    image: "/product/basintap.png",
-  },
-  {
-    name: "Wash Basin Tap - Matt Black",
-    price: "RM 980.00",
-    colors: ["#FFD700", "#BDB6A2", "#000000"],
-    image: "/product/basintap.png",
-  },
-  {
-    name: "Wash Basin Tap - Matt Black",
-    price: "RM 980.00",
-    colors: ["#FFD700", "#BDB6A2", "#000000"],
-    image: "/product/basintap.png",
-  },
-];
-
 export default function ProductDetailsPage() {
-  const [showCode, setShowCode] = useState(true);
-  const [showInfo, setShowInfo] = useState(true);
+  const router = useRouter();
+  const params = useParams();
+  const slug = params.slug as string;
+
+  const [selectedColorIdx, setSelectedColorIdx] = useState(0);
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [selectedColorIdx, setSelectedColorIdx] = useState(0);
 
-  // Define image sets for each color
-  const imageSets = [
-    ["/product/basintap.png", "/product/sideview.png", "/product/topview.png"],
-    ["/product/gold.png", "/product/goldtop.png", "/product/goldside.png"],
-    ["/product/basintap.png", "/product/sideview.png", "/product/topview.png"],
-  ];
-  const images = imageSets[selectedColorIdx] || imageSets[0];
+  const { data, error } = useSWR(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/product/slug/${slug}`,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
+
+  useEffect(() => {
+    if (error) {
+      router.push("/products");
+    }
+  }, [error, router]);
+
+  if (!data) {
+    return (
+      <>
+        <Navbar />
+        <div className="max-w-6xl mx-auto px-4 py-10">
+          <p className="text-center text-gray-500">Loading...</p>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  const { product, relatedProducts } = data;
+  if (!product) {
+    return (
+      <>
+        <Navbar />
+        <div className="max-w-6xl mx-auto px-4 py-10">
+          <p className="text-center text-red-500">Product not found</p>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  const imageSets = product.colorOptions.map((option) =>
+    option.images.map((img) => (img.startsWith("/") ? img : `/${img}`))
+  );
 
   const handleThumbnailClick = (idx: number) => {
     if (idx !== selectedImageIdx) {
@@ -70,11 +103,6 @@ export default function ProductDetailsPage() {
         setIsTransitioning(false);
       }, 300);
     }
-  };
-
-  const handleColorClick = (idx: number) => {
-    setSelectedColorIdx(idx);
-    setSelectedImageIdx(0); // Reset to first image when color changes
   };
 
   return (
@@ -89,29 +117,27 @@ export default function ProductDetailsPage() {
         </Link>
         <div className="grid md:grid-cols-2 gap-12 items-start mb-16">
           <ProductImageGallery
-            images={images}
+            imageSets={imageSets}
             selectedImageIdx={selectedImageIdx}
             isTransitioning={isTransitioning}
             onThumbnailClick={handleThumbnailClick}
+            selectedColorIdx={selectedColorIdx}
+            setSelectedColorIdx={setSelectedColorIdx}
+            setSelectedImageIdx={setSelectedImageIdx}
           />
           <ProductInfo
-            name={mockProduct.name}
-            price={mockProduct.price}
-            colors={mockProduct.colors}
-            code={mockProduct.code}
-            info={mockProduct.info}
-            material={mockProduct.material}
-            size={mockProduct.size}
-            showCode={showCode}
-            setShowCode={setShowCode}
-            showInfo={showInfo}
-            setShowInfo={setShowInfo}
-            selectedColorIdx={selectedColorIdx}
-            onColorClick={handleColorClick}
+            name={product.name}
+            price={`RM ${product.price.toFixed(2)}`}
+            colors={product.colorOptions.map((option) => option.hex)}
+            colorNames={product.colorOptions.map((option) => option.name)}
+            code={product.colorOptions[selectedColorIdx]?.code || "N/A"}
+            info={product.description}
+            material={product.material}
+            size={product.size}
+            onColorChange={setSelectedColorIdx}
           />
         </div>
         <hr className="my-4 border-gray-300" />
-        {/* You may also like */}
         <RelatedProducts relatedProducts={relatedProducts} />
       </div>
       <Footer />
