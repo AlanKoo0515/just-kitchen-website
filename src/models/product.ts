@@ -8,6 +8,7 @@ const productSchema = new Schema({
   slug: {
     type: String,
     required: true,
+    unique: true,
   },
   description: {
     type: String,
@@ -15,6 +16,10 @@ const productSchema = new Schema({
   },
   price: {
     type: Number,
+    required: true,
+  },
+  features: {
+    type: [String],
     required: true,
   },
   colorOptions: {
@@ -32,13 +37,8 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
-  size: {
-    type: [
-      {
-        label: { type: String, required: true },
-        value: { type: String, required: true },
-      },
-    ],
+  type: {
+    type: String,
     required: true,
   },
   category: {

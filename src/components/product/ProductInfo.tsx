@@ -11,7 +11,8 @@ interface ProductInfoProps {
   code: string;
   info: string;
   material: string;
-  size: { label: string; value: string }[];
+  type: string; // Replaced size
+  features: string[]; // Added
   onColorChange?: (idx: number) => void;
 }
 
@@ -23,7 +24,8 @@ export default function ProductInfo({
   code,
   info,
   material,
-  size,
+  type, // Replaced size
+  features, // Added
   onColorChange,
 }: ProductInfoProps) {
   const [showCode, setShowCode] = useState(true);
@@ -38,7 +40,7 @@ export default function ProductInfo({
   return (
     <div>
       <h1 className="text-6xl font-bold mb-2">
-        {name} - {showCode ? code : ""}
+        {name} - {code}
       </h1>
       <div className="text-2xl mb-16">{price}</div>
       <div className="mb-16">
@@ -112,16 +114,16 @@ export default function ProductInfo({
           <div className="mb-4 text-sm text-gray-700 whitespace-pre-line">
             {info}
           </div>
-          <div className="mb-2 font-semibold">Material</div>
-          <div className="mb-4 text-sm text-gray-700">{material}</div>
-          <div className="mb-2 font-semibold">Size</div>
-          <ul className="mb-4 text-sm text-gray-700">
-            {size.map((s, idx) => (
-              <li key={idx}>
-                {s.label}: {s.value}
-              </li>
+          <div className="mb-2 font-semibold">Features</div>
+          <ul className="mb-4 text-sm text-gray-700 list-disc pl-5">
+            {features.map((feature, idx) => (
+              <li key={idx}>{feature}</li>
             ))}
           </ul>
+          <div className="mb-2 font-semibold">Material</div>
+          <div className="mb-4 text-sm text-gray-700">{material}</div>
+          <div className="mb-2 font-semibold">Type</div>
+          <div className="mb-4 text-sm text-gray-700">{type}</div>
         </div>
       </div>
     </div>

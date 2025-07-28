@@ -9,6 +9,8 @@ interface ProductCardProps {
   price: string;
   colors: string[];
   slug: string;
+  features: string[]; // Added
+  type: string; // Replaced size
   onClick?: () => void;
 }
 
@@ -18,6 +20,8 @@ export default function ProductCard({
   price,
   colors,
   slug,
+  // features, // Not displayed, but included in props
+  // type, // Not displayed, but included in props
   onClick,
 }: ProductCardProps) {
   const router = useRouter();

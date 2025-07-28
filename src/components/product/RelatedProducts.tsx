@@ -7,6 +7,8 @@ interface RelatedProduct {
   colors: string[];
   image: string;
   slug: string;
+  features: string[]; // Added
+  type: string; // Replaced size
 }
 
 export default function RelatedProducts({

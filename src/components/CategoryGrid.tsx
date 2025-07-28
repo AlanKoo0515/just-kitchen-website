@@ -23,13 +23,13 @@ export default function CategoryGrid() {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       refreshInterval: 0,
-      dedupingInterval: 60000, // Prevent rapid re-fetches
+      dedupingInterval: 60000,
     }
   );
   const scrollRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [scrollStates, setScrollStates] = useState<
     { canScrollLeft: boolean; canScrollRight: boolean }[]
-  >(categories.map(() => ({ canScrollLeft: false, canScrollRight: false })));
+  >([]);
 
   const checkScrollPosition = (index: number) => {
     const container = scrollRefs.current[index];
@@ -40,6 +40,7 @@ export default function CategoryGrid() {
 
       setScrollStates((prev) => {
         if (
+          index >= prev.length ||
           prev[index]?.canScrollLeft !== canScrollLeft ||
           prev[index]?.canScrollRight !== canScrollRight
         ) {
@@ -47,7 +48,7 @@ export default function CategoryGrid() {
           newStates[index] = { canScrollLeft, canScrollRight };
           return newStates;
         }
-        return prev; // Avoid unnecessary state updates
+        return prev;
       });
     }
   };
@@ -64,17 +65,18 @@ export default function CategoryGrid() {
   };
 
   useEffect(() => {
-    // Initialize scroll states only when categories change
-    setScrollStates(
-      categories.map(() => ({ canScrollLeft: false, canScrollRight: false }))
-    );
+    // Initialize scrollStates only if length changes
+    if (scrollStates.length !== categories.length) {
+      setScrollStates(
+        categories.map(() => ({ canScrollLeft: false, canScrollRight: false }))
+      );
+    }
 
     // Set up scroll listeners
     const scrollListeners = scrollRefs.current.map((container, index) => {
       if (container) {
         const handleScroll = () => checkScrollPosition(index);
         container.addEventListener("scroll", handleScroll);
-        // Trigger initial scroll check after render
         setTimeout(() => checkScrollPosition(index), 0);
         return () => container.removeEventListener("scroll", handleScroll);
       }
@@ -84,10 +86,14 @@ export default function CategoryGrid() {
     return () => {
       scrollListeners.forEach((cleanup) => cleanup());
     };
-  }, [categories]);
+  }, [categories, scrollStates.length]); // Depend on categories.length only
 
   if (error) {
     return <div>Error loading categories. Please try again later.</div>;
+  }
+
+  if (!categories.length && !error) {
+    return <div>No categories found.</div>;
   }
 
   return (
@@ -100,8 +106,14 @@ export default function CategoryGrid() {
       </p>
       <div className="space-y-8">
         {categories.map((cat, index) => {
-          const canScrollLeft = scrollStates[index]?.canScrollLeft ?? false;
-          const canScrollRight = scrollStates[index]?.canScrollRight ?? false;
+          // Filter out "Explore All" tags
+          const filteredTags = cat.tags.filter(
+            (tag) => !tag.name.startsWith("Explore All")
+          );
+
+          if (!filteredTags.length) {
+            return null; // Skip categories with no non-"Explore All" tags
+          }
 
           return (
             <div key={cat.category} className="relative">
@@ -109,7 +121,7 @@ export default function CategoryGrid() {
                 {cat.category}
               </h3>
               <div className="relative group flex items-center min-h-[140px]">
-                {canScrollLeft && (
+                {scrollStates[index]?.canScrollLeft && (
                   <button
                     onClick={() => scroll("left", index)}
                     className="absolute left-0 top-1/3 -translate-y-1/2 z-10 bg-white/80 hover:bg-white shadow-lg rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -129,7 +141,7 @@ export default function CategoryGrid() {
                     </svg>
                   </button>
                 )}
-                {canScrollRight && (
+                {scrollStates[index]?.canScrollRight && (
                   <button
                     onClick={() => scroll("right", index)}
                     className="absolute right-0 top-1/3 -translate-y-1/2 z-10 bg-white/80 hover:bg-white shadow-lg rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -155,7 +167,7 @@ export default function CategoryGrid() {
                   }}
                   className="flex gap-9 overflow-x-auto pb-4 scrollbar-hide px-4 w-full"
                 >
-                  {cat.tags.map((item, itemIndex) => (
+                  {filteredTags.map((item, itemIndex) => (
                     <Link
                       key={`${cat.category}-${item.name}-${itemIndex}`}
                       href={`/products?category=${encodeURIComponent(

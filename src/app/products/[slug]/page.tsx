@@ -16,9 +16,10 @@ interface ProductType {
   slug: string;
   description: string;
   price: number;
+  features: string[]; // Added
   colorOptions: { name: string; hex: string; images: string[]; code: string }[];
   material: string;
-  size: { label: string; value: string }[];
+  type: string; // Replaced size
   category: string;
   tags: string;
 }
@@ -29,6 +30,8 @@ interface RelatedProduct {
   colors: string[];
   image: string;
   slug: string;
+  features: string[]; // Added
+  type: string; // Replaced size
 }
 
 const fetcher = async (
@@ -133,7 +136,8 @@ export default function ProductDetailsPage() {
             code={product.colorOptions[selectedColorIdx]?.code || "N/A"}
             info={product.description}
             material={product.material}
-            size={product.size}
+            type={product.type} // Replaced size
+            features={product.features} // Added
             onColorChange={setSelectedColorIdx}
           />
         </div>

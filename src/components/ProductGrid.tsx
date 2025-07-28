@@ -6,6 +6,8 @@ interface Product {
   price: string;
   colors: string[];
   slug: string;
+  features: string[]; // Added
+  type: string; // Replaced size
 }
 
 export default function ProductGrid({ products }: { products: Product[] }) {
@@ -19,6 +21,8 @@ export default function ProductGrid({ products }: { products: Product[] }) {
           price={product.price}
           colors={product.colors}
           slug={product.slug}
+          features={product.features} // Added
+          type={product.type} // Replaced size
         />
       ))}
     </div>

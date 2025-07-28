@@ -8,6 +8,8 @@ interface RelatedProduct {
   colors: string[];
   image: string;
   slug: string;
+  features: string[]; // Added
+  type: string; // Replaced size
 }
 
 export async function GET(
@@ -17,10 +19,13 @@ export async function GET(
   await connectDb();
   try {
     const { slug } = await params;
+    const productCount = await Product.countDocuments();
+    console.log(`Total products in database: ${productCount}`);
 
     const product = (await Product.findOne({
       slug,
     }).lean()) as ProductType | null;
+    console.log(`Product for slug "${slug}":`, product);
 
     const relatedProducts: RelatedProduct[] = product
       ? await Product.aggregate([
@@ -38,10 +43,13 @@ export async function GET(
               price: 1,
               colorOptions: 1,
               slug: 1,
+              features: 1, // Added
+              type: 1, // Replaced size
             },
           },
-        ]).then((products: ProductType[]) =>
-          products.map((p) => ({
+        ]).then((products: ProductType[]) => {
+          console.log(`Related products for "${product.name}":`, products);
+          return products.map((p) => ({
             name: p.name,
             price: `RM ${p.price.toFixed(2)}`,
             colors: p.colorOptions.map((option) => option.hex),
@@ -52,9 +60,11 @@ export async function GET(
                     : p.colorOptions[0].images[0]
                 }`
               : "/placeholder.png",
-            slug: p.slug, // Uses updated slug
-          }))
-        )
+            slug: p.slug,
+            features: p.features, // Added
+            type: p.type, // Replaced size
+          }));
+        })
       : [];
 
     return NextResponse.json({
@@ -62,7 +72,7 @@ export async function GET(
       data: { product, relatedProducts },
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error in /api/product/slug/[slug]:", error);
     return NextResponse.json({
       error: "Failed to fetch product",
       status: 500,

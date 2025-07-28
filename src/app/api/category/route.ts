@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Product } from "@/models/product";
+import { Product, ProductType } from "@/models/product";
 import connectDb from "@/lib/mongodb";
 
 export async function GET() {
@@ -27,10 +27,12 @@ export async function GET() {
       categories.map(async (cat: { category: string; tags: string[] }) => {
         const tagsWithIcons = await Promise.all(
           cat.tags.map(async (tag: string) => {
-            const product = await Product.findOne({ tags: tag }).lean();
+            const product = (await Product.findOne({
+              tags: tag,
+            }).lean()) as ProductType | null;
             return {
               name: tag,
-              icon: product?.colorOptions[0]?.images[0]
+              icon: product?.colorOptions?.[0]?.images?.[0]
                 ? `/${
                     product.colorOptions[0].images[0].startsWith("/")
                       ? product.colorOptions[0].images[0].slice(1)
@@ -49,7 +51,7 @@ export async function GET() {
 
     return NextResponse.json({ status: 200, data: categoriesWithIcons });
   } catch (error) {
-    console.error(error);
+    console.error("Error in /api/category:", error);
     return NextResponse.json({
       error: "Failed to fetch categories",
       status: 500,
